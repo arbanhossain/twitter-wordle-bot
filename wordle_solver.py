@@ -13,16 +13,24 @@ def guess(guess, word):
     result_tiles = []
     word_list = list(word)
     guess_list = list(guess)
-    for i, letter in enumerate(word_list):
-        # print(idx)
-        if letter in guess_list:
-            if word_list.count(letter) > 1:
-                if word_list[i] == guess_list[i]:
-                    result_tiles.append('G')
-                else: result_tiles.append('Y')
-            elif guess_list.index(letter) == word_list.index(letter):
-                result_tiles.append('G')
-            else: result_tiles.append('Y')
+    # for i, letter in enumerate(word_list):
+    #     # print(idx)
+    #     if letter in guess_list:
+    #         print(word_list.count(letter))
+    #         if word_list.count(letter) > 1:
+    #             print(word_list[i], guess_list[i])
+    #             if word_list[i] == guess_list[i]:
+    #                 result_tiles.append('G')
+    #             else: result_tiles.append('Y')
+    #         elif guess_list.index(letter) == word_list.index(letter):
+    #             result_tiles.append('G')
+    #         else: result_tiles.append('Y')
+    #     else: result_tiles.append('B')
+    for i in range(len(guess_list)):
+        if guess_list[i] == word_list[i]:
+            result_tiles.append('G')
+        elif guess_list[i] in word_list:
+            result_tiles.append('Y')
         else: result_tiles.append('B')
     return result_tiles
 
@@ -88,24 +96,26 @@ def valid_word(word, dic):
 
 
 def sanitize_all_words(wordlist, dic, current_guess, guess_result):
+    # print(wordlist)
     for i in range(len(current_guess)):
         if guess_result[i] == 'Y':
             if current_guess[i] in dic[i]:
                 dic[i].remove(current_guess[i])
         elif guess_result[i] == 'G':
-            dic[i] = current_guess[i]
+            dic[i] = [current_guess[i]]
         else:
             for key in dic:
                 if current_guess[i] in dic[key]:
                     dic[key].remove(current_guess[i])
-    
+    newlist = []
     for word in wordlist:
-        if not valid_word(word, dic):
-            wordlist.remove(word)
-    return wordlist, dic
+        if valid_word(word, dic) == True:
+            newlist.append(word)
+    return newlist, dic
 
 
-def solver2(word, wlist):
+def solver2(word, workinglist):
+    wlist = workinglist.copy()
     dic = {
         0: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'],
         1: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'],
@@ -121,13 +131,15 @@ def solver2(word, wlist):
         guess_result = guess(word, current_guess)
         if ''.join(guess_result) == 'GGGGG':
             return current_guess, guess_count
+        wlist, dic = sanitize_all_words(wlist.copy(), dic.copy(), current_guess, guess_result)
         print(current_guess, guess_result)
-        wlist, dic = sanitize_all_words(wlist, dic, current_guess, guess_result)
-        current_guess = wlist[0]
+        print(wlist, dic)
         input()
+        current_guess = wlist[0]
 
 if __name__ == '__main__':
     # guess and word are reversed
     # for word in all_words:
     #     print(solver2(word,all_words.copy()))
-    print(solver2("order", all_words.copy()))
+    print(solver2("their", all_words.copy()))
+    # print(guess("ouija", "their"))
