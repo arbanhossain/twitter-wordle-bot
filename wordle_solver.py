@@ -1,6 +1,4 @@
-from all_words import all_words
-
-initial_guesses = ["ouija", "fetch", "greed"]
+from all_words import all_wordle_words as all_words
 
 def get_subtracted_list(l):
     res = []
@@ -113,8 +111,14 @@ def sanitize_all_words(wordlist, dic, current_guess, guess_result):
             newlist.append(word)
     return newlist, dic
 
+def create_guess(letter_array, wordlist):
+    result_array = []
+    for word in wordlist:
+        for char in word:
+            if char not in letter_array: break
+    return result_array
 
-def solver2(word, workinglist):
+def solver2(word, workinglist, initial_guess):
     wlist = workinglist.copy()
     dic = {
         0: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'],
@@ -125,21 +129,68 @@ def solver2(word, workinglist):
     }
     guess_count = 0
     current_guess = ''
+    steps_array = []
     while True:
         guess_count += 1
-        if current_guess == '': current_guess = initial_guesses[0]
-        guess_result = guess(word, current_guess)
+        if current_guess == '': current_guess = initial_guess
+        guess_result = guess(current_guess, word)
+        steps_array.append(guess_result)
+        # print(guess_result, steps_array)
+        # input()
         if ''.join(guess_result) == 'GGGGG':
-            return current_guess, guess_count
+            return current_guess, guess_count, steps_array
         wlist, dic = sanitize_all_words(wlist.copy(), dic.copy(), current_guess, guess_result)
-        print(current_guess, guess_result)
-        print(wlist, dic)
-        input()
-        current_guess = wlist[0]
+        # print(current_guess, guess_result)
+        # print(wlist, dic)
+        # input()
+        dic_one_items = [key for key in dic if len(dic[key]) == 1]
+        dic_len_one_items = len(dic_one_items)
+        temp_guess = []
+        if dic_len_one_items >= 4 and len(wlist) > 1:
+            letter_array = [dic[key] for key in dic if len(dic[key]) > 1][0]
+            letter_array.extend(dic_one_items)
+            letter_array.pop()
+            temp_guess = create_guess(letter_array.copy(), workinglist.copy())
+        if len(temp_guess) > 0:
+            current_guess = temp_guess[0]
+        else: current_guess = wlist[0]
+
+def Sort_Tuple(tup): 
+      
+    # getting length of list of tuples
+    lst = len(tup) 
+    for i in range(0, lst): 
+          
+        for j in range(0, lst-i-1): 
+            if (tup[j][1] > tup[j + 1][1]): 
+                temp = tup[j] 
+                tup[j]= tup[j + 1] 
+                tup[j + 1]= temp 
+    return tup
 
 if __name__ == '__main__':
-    # guess and word are reversed
-    # for word in all_words:
-    #     print(solver2(word,all_words.copy()))
-    print(solver2("their", all_words.copy()))
+    init = ["adieu"]
+
+    results = []
+    morethan6cnt = 0
+    for word in all_words:
+        i = 0
+        guesses = []
+        for i in range(len(init)):
+            result = solver2( word, all_words.copy(), init[i] )
+            guesses.append(result)
+        
+        guesses = Sort_Tuple(guesses)
+        results.append(guesses[0])
+        
+        # results.append(solver2(word,all_words.copy()))
+        if guesses[0][1] > 6:
+            morethan6cnt += 1
+            print(result)
+    print(morethan6cnt)
+
+    # print( solver2( "aback", all_words.copy(), init[0] ) )
+
+    # new_result = [x for x in results if x[1] > 6]
+    # print( solver2( "fight", all_words.copy(), init[i] ) )
     # print(guess("ouija", "their"))
