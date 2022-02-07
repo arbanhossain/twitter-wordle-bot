@@ -2,3 +2,6 @@ __pycache__
 *.txt
 all_words.py
 .env
+test.py
+pinBasedBotAuth.py
+*.csv
